@@ -189,7 +189,7 @@ def finitize(_INPUT):
         yield i
 
 
-def get_value(field, item=None, force=False, **kwargs):
+def get_value(field, item=None, force=False, default=None, **kwargs):
     item = item or {}
 
     OPS = {
@@ -206,22 +206,22 @@ def get_value(field, item=None, force=False, **kwargs):
         kwargs.update(OPS['text'])
 
     try:
-        value = item.get(field['subkey'], **kwargs)
+        value = item.get(field['subkey'], default, **kwargs)
     except KeyError:
         if field and not (hasattr(field, 'delete') or force):
             raise TypeError('field must be of type DotDict')
         elif force:
             value = field
         elif field:
-            value = field.get(None, **kwargs)
+            value = field.get(None, default, **kwargs)
         else:
-            value = kwargs.get('default')
+            value = default
     except (TypeError, AttributeError):
         # field is already set to a value so use it or the default
-        value = field or kwargs.get('default')
+        value = field or default
     except (ValueError):
         # error converting subkey value with OPS['func'] so use the default
-        value = kwargs.get('default')
+        value = default
 
     return value
 
